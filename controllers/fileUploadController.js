@@ -1,14 +1,16 @@
 const multer = require('multer');
 const QRCode = require('qrcode');
 const File = require('../models/fileModel');
+const path = require('path'); // To use path.extname()
 
 // Multer file storage configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, './uploads/');
+    cb(null, './uploads/'); // Saving the file in the 'uploads' folder
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // unique filename
+    // Creating a unique filename based on the current time and file extension
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 
@@ -19,21 +21,26 @@ const uploadFile = async (req, res) => {
   const file = req.file;
 
   try {
-    // Generate QR code for the file
-    const qrCodeUrl = await QRCode.toDataURL(file.path);
+    
+
+    // Construct the full download URL for the file
+    const downloadUrl = `http://localhost:5000/uploads/${file.filename}`;
+
+    // Generate QR code for the file path
+    const qrCodeUrl = await QRCode.toDataURL(downloadUrl);
 
     // Save file metadata to the database using Sequelize
     const uploadedFile = await File.create({
       filename: file.filename,
       version: version,
-      downloadUrl: file.path,
-      qrCode: qrCodeUrl,
+      downloadUrl: downloadUrl,  // Full URL to the file
+      qrCode: qrCodeUrl,         // QR code as a base64-encoded string
     });
 
-    // Return file information as a response
+    // Send back the response with the file info
     res.status(201).json({
       id: uploadedFile.id,
-      downloadUrl: file.path,
+      downloadUrl: downloadUrl,
       qrCode: qrCodeUrl,
     });
   } catch (err) {
@@ -42,7 +49,31 @@ const uploadFile = async (req, res) => {
   }
 };
 
+// Controller to get the list of uploaded files
+const listFiles = async (req, res) => {
+  try {
+    // Fetch all files from the database
+    const files = await File.findAll();
+
+    res.status(200).json({
+      success: true,
+      data: files.map((file) => ({
+        id: file.id,
+        filename: file.filename,
+        version: file.version,
+        downloadUrl: file.downloadUrl, // Full URL to the file
+        qrCode: file.qrCode,           // QR code URL or data URI
+        createdAt: file.createdAt,
+      })),
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Unable to fetch files' });
+  }
+};
+
 module.exports = {
   uploadFile,
-  upload, // Export multer middleware for use in routes
+  upload, // Export the multer upload middleware for use in routes
+  listFiles,
 };

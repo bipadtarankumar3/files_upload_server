@@ -5,6 +5,10 @@ const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
 const fileUploadRoutes = require('./routes/fileUpload');
 const sequelize = require('./models/db');
+const path = require('path');
+
+// Serve static files from the 'uploads' folder
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Middleware
 app.use(cors());

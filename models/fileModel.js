@@ -15,25 +15,25 @@ const File = sequelize.define('files', {
   // Filename of the uploaded file
   filename: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
 
   // Version of the uploaded file
   version: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
 
   // Download URL of the uploaded file
   downloadUrl: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
 
   // QR Code for the file download link
   qrCode: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: DataTypes.TEXT,
+    allowNull: true,
   },
 
   // User who created the file (Foreign Key)
@@ -43,7 +43,7 @@ const File = sequelize.define('files', {
       model: User,    // Reference the User model
       key: 'id',      // Reference the 'id' field from the User model
     },
-    allowNull: false,
+    allowNull: true,
   },
 
   // Timestamps (created_at, updated_at, and deleted_at)
