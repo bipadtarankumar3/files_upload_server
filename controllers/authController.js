@@ -1,18 +1,17 @@
 const jwt = require('jsonwebtoken');
-const pool = require('../models/db');
+const User = require('../models/userModel');
 
-// Authenticate the user
 const loginUser = async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
-  // Check user credentials in the database
   try {
-    const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
-
-    if (result.rows.length > 0 && result.rows[0].password === password) {
-      // Generate JWT Token
-      const token = jwt.sign({ id: result.rows[0].id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-      res.json({ token });
+    // Find user by email using Sequelize's `findOne` method
+    const user = await User.findOne({ where: { email } });
+    
+    if (user && user.password === password) {
+      // If valid, generate a JWT token
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      return res.json({ token });
     } else {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
