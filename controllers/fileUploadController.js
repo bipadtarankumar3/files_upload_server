@@ -17,7 +17,11 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 const uploadFile = async (req, res) => {
-  const { version } = req.body;
+
+  // console.log(req.body.project_name); return;
+  
+
+  const { version,project_name } = req.body;
   const file = req.file;
 
   try {
@@ -32,6 +36,7 @@ const uploadFile = async (req, res) => {
     // Save file metadata to the database using Sequelize
     const uploadedFile = await File.create({
       filename: file.filename,
+      project_name: project_name,
       version: version,
       downloadUrl: downloadUrl,  // Full URL to the file
       qrCode: qrCodeUrl,         // QR code as a base64-encoded string
@@ -59,6 +64,7 @@ const listFiles = async (req, res) => {
       success: true,
       data: files.map((file) => ({
         id: file.id,
+        project_name: file.project_name,
         filename: file.filename,
         version: file.version,
         downloadUrl: file.downloadUrl, // Full URL to the file

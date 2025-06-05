@@ -13,6 +13,11 @@ const File = sequelize.define('files', {
   },
 
   // Filename of the uploaded file
+  project_name: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  // Filename of the uploaded file
   filename: {
     type: DataTypes.STRING,
     allowNull: true,
